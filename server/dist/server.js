@@ -1,25 +1,95 @@
 import fastify from "fastify";
-import fastifyCors from "@fastify/cors";
-import pkg from "pg";
-const { Pool } = pkg;
+import cors from "@fastify/cors";
+import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
-const app = fastify();
-app.register(fastifyCors);
-const pool = new Pool({
-    connectionString: process.env.DB_URL,
+const app = fastify({
+    logger: true,
 });
-app.post("/create-user-table", async (request, reply) => {
-    // const result = await pool.query(`DROP TABLE users`)
-    const result = await pool.query(`
-    CREATE TABLE users (
-      id serial PRIMARY KEY,
-      username varchar(100) NOT NULL,
-      email varchar(100) NOT NULL,
-      password varchar(100) NOT NULL
-    )
-  `);
-    reply.send(result);
+await app.register(cors, {
+    origin: "*",
+});
+// ユーザー情報取得
+app.get("/users", async (request, reply) => {
+    const query = `
+    {
+      users_users(order_by: {id: asc}) {
+        id
+        username
+        email
+        password
+      }
+    }
+  `;
+    const { data } = await axios.post(`${process.env.GRAPHQL_URL}`, {
+        query,
+    });
+    reply.send(data.data);
+});
+// ユーザー登録
+app.post("/create", async (request, reply) => {
+    const body = request.body;
+    const query = `
+    mutation {
+      insert_users_users (objects: [{
+        username: "${body.username}",
+        email: "${body.email}",
+        password: "${body.password}"
+      }]) {
+        returning {
+          id
+          username
+          email
+          password
+        }
+      }
+    }
+  `;
+    const { data } = await axios.post(`${process.env.GRAPHQL_URL}`, {
+        query,
+    });
+    reply.send(data.data);
+});
+// ユーザー更新
+app.post("/update", async (request, reply) => {
+    const body = request.body;
+    const query = `
+    mutation {
+      update_users_users(
+        where: {id: {_eq: ${body.id}}},
+        _set: {
+          username: "${body.username}",
+          email: "${body.email}",
+          password: "${body.password}"
+        }
+      ) {
+        affected_rows
+        returning {
+          id
+          username
+          email
+          password
+        }
+      }
+    }
+  `;
+    const { data } = await axios.post(`${process.env.GRAPHQL_URL}`, {
+        query,
+    });
+    return reply.send(data.data);
+});
+// ユーザー削除
+app.post("/delete", async (request, reply) => {
+    const body = request.body;
+    const query = `
+    mutation {
+      delete_users_users(where: {id: {_eq: ${body.id}}}) {
+        affected_rows
+      }
+    }
+  `;
+    await axios.post(`${process.env.GRAPHQL_URL}`, { query });
+    return reply.send({ message: "正常に削除されました。" });
 });
 app.listen(3000, (err, address) => {
     if (err) {
