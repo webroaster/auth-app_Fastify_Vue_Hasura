@@ -119,6 +119,38 @@ app.post("/delete", async (request, reply) => {
   return reply.send({ message: "正常に削除されました。" })
 })
 
+app.post("/login", async (request, reply) => {
+  const body = request.body as {
+    usernameOrEmail: string
+    password: string
+  }
+
+  const query = `
+  query {
+    users_users(
+      where: {
+        _or: [
+          {username: {_eq: "${body.usernameOrEmail}"}},
+          {email: {_eq: "${body.usernameOrEmail}"}}
+        ]
+        password: {_eq: "${body.password}"}
+      }
+    ) {
+      id
+      username
+      email
+      password
+    }
+  }
+  `
+
+  const { data } = await axios.post(`${process.env.GRAPHQL_URL}`, {
+    query,
+  })
+
+  return reply.send(data.data)
+})
+
 app.listen(3000, (err, address) => {
   if (err) {
     console.error(err)
