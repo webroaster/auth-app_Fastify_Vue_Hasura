@@ -4,6 +4,7 @@ import UsersTable from "@/components/UsersTable.vue"
 import { ref, onBeforeMount, watchEffect } from "vue"
 import router from "@/router"
 import { useStore } from "vuex"
+import type User from "@/types/User"
 
 const store = useStore()
 
@@ -22,12 +23,6 @@ watchEffect(() => {
   }
 })
 
-interface User {
-  id: number
-  username: string
-  email: string
-  password: string
-}
 const editData = ref()
 const onEditUser = (value: User) => {
   editData.value = value

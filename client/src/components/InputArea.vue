@@ -6,10 +6,12 @@ import type { PropType } from "vue"
 const username = ref("")
 const email = ref("")
 const password = ref("")
+const confirmPassword = ref("")
 const isUpdate = ref(false)
+const isError = ref(false)
 
 const handleCancel = () => {
-  isUpdate.value = !isUpdate.value
+  isUpdate.value = false
   username.value = ""
   email.value = ""
   password.value = ""
@@ -17,14 +19,19 @@ const handleCancel = () => {
 
 // ユーザー作成
 const createUser = async () => {
-  try {
+  if (
+    username.value === "" ||
+    email.value === "" ||
+    password.value === "" ||
+    password.value !== confirmPassword.value
+  ) {
+    isError.value = true
+  } else {
     await axios.post("/create", {
       username: username.value,
       email: email.value,
       password: password.value,
     })
-  } catch (err) {
-    console.error(err)
   }
 }
 
@@ -45,21 +52,29 @@ watch(
 )
 // ユーザー更新
 const updateUser = async () => {
-  try {
+  if (
+    username.value === "" ||
+    email.value === "" ||
+    password.value === "" ||
+    password.value !== confirmPassword.value
+  ) {
+    isError.value = true
+  } else {
     await axios.post("/update", {
       id: props.editData.id,
       username: username.value,
       email: email.value,
       password: password.value,
     })
-  } catch (err) {
-    console.error(err)
   }
 }
 </script>
 
 <template>
   <form>
+    <p class="error-message" v-if="isError">
+      入力欄が正しく入力されていません。
+    </p>
     <label for="username">ユーザー名</label>
     <input
       type="text"
@@ -82,6 +97,14 @@ const updateUser = async () => {
       placeholder="password"
       id="password"
       v-model="password"
+      required
+    />
+    <label for="confirmPassword">確認用パスワード</label>
+    <input
+      type="password"
+      placeholder="confirmPassword"
+      id="confirmPassword"
+      v-model="confirmPassword"
       required
     />
     <div v-if="!isUpdate">

@@ -6,20 +6,21 @@ import { useStore } from "vuex"
 const store = useStore()
 const usernameOrEmail = ref("")
 const password = ref("")
+const isError = ref(false)
 
 const handleLogin = async () => {
-  try {
-    await store
-      .dispatch("login", {
-        usernameOrEmail: usernameOrEmail.value,
-        password: password.value,
-      })
-      .then(() => {
+  await store
+    .dispatch("login", {
+      usernameOrEmail: usernameOrEmail.value,
+      password: password.value,
+    })
+    .then(() => {
+      if (!store.state.user) {
+        isError.value = true
+      } else {
         router.push("/")
-      })
-  } catch (err) {
-    console.error(err)
-  }
+      }
+    })
 }
 </script>
 
@@ -27,17 +28,33 @@ const handleLogin = async () => {
   <div class="form-wrap">
     <h2>ログイン</h2>
     <form v-on:submit.prevent="handleLogin">
-      <label>ユーザー名 or Email</label>
-      <input type="text" placeholder="username" v-model="usernameOrEmail" />
-      <label>Password</label>
-      <input type="password" placeholder="password" v-model="password" />
-      <button type="submit">Sign In</button>
+      <p class="error-message" v-if="isError">
+        ユーザー名またはパスワードが違います。
+      </p>
+      <label>ユーザー名 or メールアドレス</label>
+      <input
+        type="text"
+        placeholder="username"
+        required
+        v-model="usernameOrEmail"
+      />
+      <label>パスワード</label>
+      <input
+        type="password"
+        placeholder="password"
+        required
+        v-model="password"
+      />
+      <button type="submit">ログイン</button>
       <router-link to="/register">新規登録</router-link>
     </form>
   </div>
 </template>
 
 <style>
+.error-message {
+  color: red;
+}
 .form-wrap {
   border: 1px solid #ccc;
   border-radius: 10px;

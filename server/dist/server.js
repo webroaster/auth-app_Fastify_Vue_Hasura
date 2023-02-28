@@ -13,7 +13,7 @@ await app.register(cors, {
 app.get("/users", async (request, reply) => {
     const query = `
     {
-      users_users(order_by: {id: asc}) {
+      ${process.env.TABLE_NAME}(order_by: {id: asc}) {
         id
         username
         email
@@ -31,7 +31,7 @@ app.post("/create", async (request, reply) => {
     const body = request.body;
     const query = `
     mutation {
-      insert_users_users (objects: [{
+      insert_${process.env.TABLE_NAME} (objects: [{
         username: "${body.username}",
         email: "${body.email}",
         password: "${body.password}"
@@ -55,7 +55,7 @@ app.post("/update", async (request, reply) => {
     const body = request.body;
     const query = `
     mutation {
-      update_users_users(
+      update_${process.env.TABLE_NAME}(
         where: {id: {_eq: ${body.id}}},
         _set: {
           username: "${body.username}",
@@ -83,7 +83,7 @@ app.post("/delete", async (request, reply) => {
     const body = request.body;
     const query = `
     mutation {
-      delete_users_users(where: {id: {_eq: ${body.id}}}) {
+      delete_${process.env.TABLE_NAME}(where: {id: {_eq: ${body.id}}}) {
         affected_rows
       }
     }
@@ -95,7 +95,7 @@ app.post("/login", async (request, reply) => {
     const body = request.body;
     const query = `
   query {
-    users_users(
+    ${process.env.TABLE_NAME}(
       where: {
         _or: [
           {username: {_eq: "${body.usernameOrEmail}"}},
@@ -114,6 +114,9 @@ app.post("/login", async (request, reply) => {
     const { data } = await axios.post(`${process.env.GRAPHQL_URL}`, {
         query,
     });
+    if (!data || Object.keys(data.data.users_users).length === 0) {
+        return reply.status(404).send({ message: "ユーザーが見つかりません" });
+    }
     return reply.send(data.data);
 });
 app.listen(3000, (err, address) => {

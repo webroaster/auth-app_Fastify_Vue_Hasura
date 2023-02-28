@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, defineEmits } from "vue"
 import axios from "../axios-for-auth"
+import { useStore } from "vuex"
+import type User from "@/types/User"
 
-interface Users {
-  id: number
-  username: string
-  email: string
-  password: string
-}
+const users = ref<User[]>([])
+const store = useStore()
 
-const users = ref<Users[]>([])
-
+// 全てのユーザーを取得
 const getUsers = async () => {
   try {
     const response = await (await axios.get("/users")).data.users_users
@@ -20,7 +17,6 @@ const getUsers = async () => {
   }
 }
 
-// 全てのユーザー取得
 onMounted(() => {
   getUsers()
 })
@@ -37,6 +33,7 @@ const deleteUser = async (id: number) => {
   }
 }
 
+// 更新するユーザー情報を渡す
 const emit = defineEmits(["click-edit"])
 const onClickEdit = (
   id: number,
@@ -60,7 +57,7 @@ const onClickEdit = (
       <td>{{ user.username }}</td>
       <td>{{ user.email }}</td>
       <td>{{ user.password }}</td>
-      <td class="edit-wrap">
+      <td class="edit-wrap" v-if="store.state.user.id !== user.id">
         <button
           @click="
             onClickEdit(user.id, user.username, user.email, user.password)
@@ -73,6 +70,7 @@ const onClickEdit = (
           delete
         </button>
       </td>
+      <td v-else></td>
     </tr>
   </table>
 </template>

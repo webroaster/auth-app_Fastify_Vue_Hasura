@@ -2,6 +2,7 @@ import fastify from "fastify"
 import cors from "@fastify/cors"
 import axios from "axios"
 import dotenv from "dotenv"
+import User from "./types/User"
 
 dotenv.config()
 
@@ -17,7 +18,7 @@ await app.register(cors, {
 app.get("/users", async (request, reply) => {
   const query = `
     {
-      users_users(order_by: {id: asc}) {
+      ${process.env.TABLE_NAME}(order_by: {id: asc}) {
         id
         username
         email
@@ -34,14 +35,10 @@ app.get("/users", async (request, reply) => {
 
 // ユーザー登録
 app.post("/create", async (request, reply) => {
-  const body = request.body as {
-    username: string
-    email: string
-    password: string
-  }
+  const body = request.body as User
   const query = `
     mutation {
-      insert_users_users (objects: [{
+      insert_${process.env.TABLE_NAME} (objects: [{
         username: "${body.username}",
         email: "${body.email}",
         password: "${body.password}"
@@ -65,16 +62,11 @@ app.post("/create", async (request, reply) => {
 
 // ユーザー更新
 app.post("/update", async (request, reply) => {
-  const body = request.body as {
-    id: number
-    username: string
-    email: string
-    password: string
-  }
+  const body = request.body as User
 
   const query = `
     mutation {
-      update_users_users(
+      update_${process.env.TABLE_NAME}(
         where: {id: {_eq: ${body.id}}},
         _set: {
           username: "${body.username}",
@@ -102,13 +94,11 @@ app.post("/update", async (request, reply) => {
 
 // ユーザー削除
 app.post("/delete", async (request, reply) => {
-  const body = request.body as {
-    id: number
-  }
+  const body = request.body as User
 
   const query = `
     mutation {
-      delete_users_users(where: {id: {_eq: ${body.id}}}) {
+      delete_${process.env.TABLE_NAME}(where: {id: {_eq: ${body.id}}}) {
         affected_rows
       }
     }
@@ -120,14 +110,11 @@ app.post("/delete", async (request, reply) => {
 })
 
 app.post("/login", async (request, reply) => {
-  const body = request.body as {
-    usernameOrEmail: string
-    password: string
-  }
+  const body = request.body as User
 
   const query = `
   query {
-    users_users(
+    ${process.env.TABLE_NAME}(
       where: {
         _or: [
           {username: {_eq: "${body.usernameOrEmail}"}},
@@ -148,6 +135,9 @@ app.post("/login", async (request, reply) => {
     query,
   })
 
+  if (!data || Object.keys(data.data.users_users).length === 0) {
+    return reply.status(404).send({ message: "ユーザーが見つかりません" })
+  }
   return reply.send(data.data)
 })
 
