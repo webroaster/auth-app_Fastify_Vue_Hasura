@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import InputArea from "@/components/InputArea.vue"
 import UsersTable from "@/components/UsersTable.vue"
-import { onBeforeMount, watchEffect } from "vue"
+import { ref, onBeforeMount, watchEffect } from "vue"
 import router from "@/router"
 import { useStore } from "vuex"
 
@@ -21,17 +21,28 @@ watchEffect(() => {
     router.push("/login")
   }
 })
+
+interface User {
+  id: number
+  username: string
+  email: string
+  password: string
+}
+const editData = ref()
+const onEditUser = (value: User) => {
+  editData.value = value
+}
 </script>
 
 <template>
   <div>
     <h1>Profile</h1>
-    <div v-show="store.state.user">
-      <p>{{ store.state.user.username }}</p>
-      <p>{{ store.state.user.email }}</p>
+    <div v-show="user">
+      <p>{{ user.username }}</p>
+      <p>{{ user.email }}</p>
     </div>
   </div>
-  <InputArea />
+  <InputArea :edit-data="editData" />
 
-  <UsersTable />
+  <UsersTable @click-edit="onEditUser" />
 </template>
