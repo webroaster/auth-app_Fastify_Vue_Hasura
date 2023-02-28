@@ -30,13 +30,6 @@ const onEditUser = (value: User) => {
 </script>
 
 <template>
-  <div>
-    <h1>Profile</h1>
-    <div v-show="user">
-      <p>{{ user.username }}</p>
-      <p>{{ user.email }}</p>
-    </div>
-  </div>
   <InputArea :edit-data="editData" />
 
   <UsersTable @click-edit="onEditUser" />

@@ -57,7 +57,7 @@ const onClickEdit = (
       <td>{{ user.username }}</td>
       <td>{{ user.email }}</td>
       <td>{{ user.password }}</td>
-      <td class="edit-wrap" v-if="store.state.user.id !== user.id">
+      <td class="edit-wrap">
         <button
           @click="
             onClickEdit(user.id, user.username, user.email, user.password)
@@ -66,11 +66,14 @@ const onClickEdit = (
         >
           edit
         </button>
-        <button @click.prevent="deleteUser(user.id)" class="delete-bottom">
+        <button
+          v-if="store.state.user.id !== user.id"
+          @click.prevent="deleteUser(user.id)"
+          class="delete-bottom"
+        >
           delete
         </button>
       </td>
-      <td v-else></td>
     </tr>
   </table>
 </template>
