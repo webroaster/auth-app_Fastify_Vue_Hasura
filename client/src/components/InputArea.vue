@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import axios from "../axios-for-auth"
-import { ref, defineProps, watch } from "vue"
+import { ref, watch } from "vue"
 import type { PropType } from "vue"
+import type User from "@/types/User"
 
 const username = ref("")
 const email = ref("")
@@ -38,7 +39,8 @@ const createUser = async () => {
 // 更新するユーザー情報を受け取る
 const props = defineProps({
   editData: {
-    type: String as PropType<string> | any,
+    type: Object as PropType<User>,
+    required: true,
   },
 })
 watch(

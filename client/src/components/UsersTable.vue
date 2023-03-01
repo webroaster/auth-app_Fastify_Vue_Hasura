@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, defineEmits } from "vue"
+import { ref, onMounted } from "vue"
 import axios from "../axios-for-auth"
 import { useStore } from "vuex"
 import type User from "@/types/User"
