@@ -1,40 +1,22 @@
-import axios from "axios"
 import { FastifyInstance } from "fastify"
-// import { getUserController } from "./controllers"
-
-const TABLE_NAME = process.env.TABLE_NAME
-
-const graphqlAxiosInstance = axios.create({
-  baseURL: process.env.GRAPHQL_URL,
-})
+import {
+  getUserController,
+  createUserController,
+  updateUserController,
+  deleteUserController,
+  loginController,
+} from "./controllers"
 
 const routes = async (app: FastifyInstance) => {
-  // app.get("/users", getUserController)
-  app.get("/users", async (_, reply) => {
-    const query = `
-    {
-      ${TABLE_NAME}(order_by: {id: asc}) {
-        id
-        username
-        email
-        password
-      }
-    }
-  `
-    const { data } = await graphqlAxiosInstance.post("", {
-      query,
-    })
+  app.get("/users", getUserController)
 
-    return reply.send(data.data)
-  })
+  app.post("/create", createUserController)
 
-  // app.post("/create", createUserController)
+  app.post("/update", updateUserController)
 
-  // app.post("/update", updateUserController)
+  app.post("/delete", deleteUserController)
 
-  // app.post("/delete", deleteUserController)
-
-  // app.post("/login", loginController)
+  app.post("/login", loginController)
 }
 
 export default routes
