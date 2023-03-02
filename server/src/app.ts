@@ -2,6 +2,7 @@ import fastify from "fastify"
 import cors from "@fastify/cors"
 import axios from "axios"
 import dotenv from "dotenv"
+import routes from "./routes"
 import User from "./types/User"
 
 dotenv.config()
@@ -14,11 +15,20 @@ await app.register(cors, {
   origin: "*",
 })
 
+// app.register(routes)
+
+const TABLE_NAME = process.env.TABLE_NAME
+
+const graphqlAxiosInstance = axios.create({
+  baseURL: process.env.GRAPHQL_URL,
+})
+
+// app.register(routes)
 // ユーザー情報取得
-app.get("/users", async (request, reply) => {
+app.get("/users", async (_, reply) => {
   const query = `
     {
-      ${process.env.TABLE_NAME}(order_by: {id: asc}) {
+      ${TABLE_NAME}(order_by: {id: asc}) {
         id
         username
         email
@@ -26,7 +36,7 @@ app.get("/users", async (request, reply) => {
       }
     }
   `
-  const { data } = await axios.post(`${process.env.GRAPHQL_URL}`, {
+  const { data } = await graphqlAxiosInstance.post("", {
     query,
   })
 
@@ -38,7 +48,7 @@ app.post("/create", async (request, reply) => {
   const body = request.body as User
   const query = `
     mutation {
-      insert_${process.env.TABLE_NAME} (objects: [{
+      insert_${TABLE_NAME} (objects: [{
         username: "${body.username}",
         email: "${body.email}",
         password: "${body.password}"
@@ -53,7 +63,7 @@ app.post("/create", async (request, reply) => {
     }
   `
 
-  const { data } = await axios.post(`${process.env.GRAPHQL_URL}`, {
+  const { data } = await graphqlAxiosInstance.post("", {
     query,
   })
 
@@ -66,7 +76,7 @@ app.post("/update", async (request, reply) => {
 
   const query = `
     mutation {
-      update_${process.env.TABLE_NAME}(
+      update_${TABLE_NAME}(
         where: {id: {_eq: ${body.id}}},
         _set: {
           username: "${body.username}",
@@ -85,7 +95,7 @@ app.post("/update", async (request, reply) => {
     }
   `
 
-  const { data } = await axios.post(`${process.env.GRAPHQL_URL}`, {
+  const { data } = await graphqlAxiosInstance.post("", {
     query,
   })
 
@@ -98,40 +108,41 @@ app.post("/delete", async (request, reply) => {
 
   const query = `
     mutation {
-      delete_${process.env.TABLE_NAME}(where: {id: {_eq: ${body.id}}}) {
+      delete_${TABLE_NAME}(where: {id: {_eq: ${body.id}}}) {
         affected_rows
       }
     }
   `
 
-  await axios.post(`${process.env.GRAPHQL_URL}`, { query })
+  await graphqlAxiosInstance.post("", { query })
 
   return reply.send({ message: "正常に削除されました。" })
 })
 
+// ログイン
 app.post("/login", async (request, reply) => {
   const body = request.body as User
 
   const query = `
-  query {
-    ${process.env.TABLE_NAME}(
-      where: {
-        _or: [
-          {username: {_eq: "${body.usernameOrEmail}"}},
-          {email: {_eq: "${body.usernameOrEmail}"}}
-        ]
-        password: {_eq: "${body.password}"}
+    query {
+      ${TABLE_NAME}(
+        where: {
+          _or: [
+            {username: {_eq: "${body.usernameOrEmail}"}},
+            {email: {_eq: "${body.usernameOrEmail}"}}
+          ]
+          password: {_eq: "${body.password}"}
+        }
+      ) {
+        id
+        username
+        email
+        password
       }
-    ) {
-      id
-      username
-      email
-      password
     }
-  }
   `
 
-  const { data } = await axios.post(`${process.env.GRAPHQL_URL}`, {
+  const { data } = await graphqlAxiosInstance.post("", {
     query,
   })
 
