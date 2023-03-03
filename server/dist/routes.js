@@ -1,4 +1,4 @@
-import { getUserController, createUserController, updateUserController, deleteUserController, loginController, } from "./controllers";
+import { getUserController, createUserController, updateUserController, deleteUserController, loginController, } from "./controllers.js";
 const routes = async (app) => {
     app.get("/users", getUserController);
     app.post("/create", createUserController);

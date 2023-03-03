@@ -5,7 +5,7 @@ import {
   updateUserController,
   deleteUserController,
   loginController,
-} from "./controllers"
+} from "./controllers.js"
 
 const routes = async (app: FastifyInstance) => {
   app.get("/users", getUserController)
