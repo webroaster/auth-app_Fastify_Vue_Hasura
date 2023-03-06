@@ -1,12 +1,18 @@
-import axios from "axios";
-import dotenv from "dotenv";
-dotenv.config();
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.loginController = exports.deleteUserController = exports.updateUserController = exports.createUserController = exports.getUserController = void 0;
+const axios_1 = __importDefault(require("axios"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const TABLE_NAME = process.env.TABLE_NAME;
-const graphqlAxiosInstance = axios.create({
+const graphqlAxiosInstance = axios_1.default.create({
     baseURL: process.env.GRAPHQL_URL,
 });
 // ユーザー情報取得
-export const getUserController = {
+exports.getUserController = {
     handler: async (_, reply) => {
         const query = `
     {
@@ -23,7 +29,7 @@ export const getUserController = {
     },
 };
 // // ユーザー登録
-export const createUserController = {
+exports.createUserController = {
     handler: async (request, reply) => {
         const body = request.body;
         const query = `
@@ -47,7 +53,7 @@ export const createUserController = {
     },
 };
 // // ユーザー更新
-export const updateUserController = {
+exports.updateUserController = {
     handler: async (request, reply) => {
         const body = request.body;
         const query = `
@@ -77,7 +83,7 @@ export const updateUserController = {
     },
 };
 // // ユーザー削除
-export const deleteUserController = {
+exports.deleteUserController = {
     handler: async (request, reply) => {
         const body = request.body;
         const query = `
@@ -92,7 +98,7 @@ export const deleteUserController = {
     },
 };
 // // ログイン
-export const loginController = {
+exports.loginController = {
     handler: async (request, reply) => {
         const body = request.body;
         const query = `
